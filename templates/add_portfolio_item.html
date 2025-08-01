@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #FF7F50;">
+                    <h4 class="mb-0">Добавить работу в портфолио</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Название работы*</label>
+                            <input type="text" name="title" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Описание</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Ссылка на изображение*</label>
+                            <input type="url" name="image_url" class="form-control" required>
+                            <div class="form-text">Временно. В реальном проекте будет загрузка файлов</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Добавить работу</button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

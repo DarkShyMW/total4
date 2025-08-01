@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header text-white" style="background-color: #FF7F50;">
+                <h4 class="mb-0">Регистрация</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Имя пользователя</label>
+                        <input type="text" name="username" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Пароль</label>
+                        <input type="password" name="password" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Ваш вид (фурсона)</label>
+                        <input type="text" name="species" class="form-control" placeholder="Например: лис, волк, дракон..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Роль</label>
+                        <select name="role" class="form-select" id="roleSelect">
+                            <option value="client">Заказчик</option>
+                            <option value="artist">Художник</option>
+                        </select>
+                    </div>
+                    
+                    <div id="artistFields" style="display: none;">
+                        <div class="mb-3">
+                            <label class="form-label">Стиль рисования</label>
+                            <input type="text" name="style" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Опыт (лет)</label>
+                            <input type="number" name="experience" class="form-control" min="0">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Цена за час ($)</label>
+                            <input type="number" name="price_per_hour" class="form-control" min="0" step="0.01">
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Зарегистрироваться</button>
+                </form>
+                
+                <div class="mt-3 text-center">
+                    Уже есть аккаунт? <a href="{{ url_for('login') }}">Войти</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('roleSelect').addEventListener('change', function() {
+        document.getElementById('artistFields').style.display = 
+            this.value === 'artist' ? 'block' : 'none';
+    });
+</script>
+{% endblock %}

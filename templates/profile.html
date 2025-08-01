@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="card-img-top" alt="{{ artist.username }}" style="height: 200px; object-fit: cover;">
+                    <h3>{{ user.username }}</h3>
+                    <p class="text-muted">
+                        {% if user.role == 'artist' %}
+                            Художник
+                        {% else %}
+                            Заказчик
+                        {% endif %}
+                    </p>
+                    
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{{ url_for('edit_profile') }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Редактировать профиль
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="mb-0">Информация о профиле</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3">Email</dt>
+                        <dd class="col-sm-9">{{ user.email }}</dd>
+                        
+                        <dt class="col-sm-3">Telegram</dt>
+                        <dd class="col-sm-9">{{ user.telegram or 'Не указан' }}</dd>
+                        
+                        {% if user.role == 'artist' %}
+                            <dt class="col-sm-3">Стиль</dt>
+                            <dd class="col-sm-9">{{ user.style or 'Не указан' }}</dd>
+                            
+                            <dt class="col-sm-3">Опыт</dt>
+                            <dd class="col-sm-9">{{ user.experience }} лет</dd>
+                            
+                            <dt class="col-sm-3">Цена за час</dt>
+                            <dd class="col-sm-9">${{ user.price_per_hour }}</dd>
+                            
+                            <dt class="col-sm-3">Рейтинг</dt>
+                            <dd class="col-sm-9">
+                                <span class="rating-stars">
+                                    {% for i in range(5) %}
+                                        {% if i < user.rating|int %}
+                                            <i class="bi bi-star-fill"></i>
+                                        {% else %}
+                                            <i class="bi bi-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                </span>
+                                {{ user.rating|round(1) }} ({{ user.reviews_received|length }} отзывов)
+                            </dd>
+                        {% endif %}
+                    </dl>
+                    
+                    <h5 class="mt-4">О себе</h5>
+                    <p>{{ user.bio or 'Пользователь пока не добавил информацию о себе.' }}</p>
+                </div>
+            </div>
+            
+            {% if user.role == 'artist' %}
+<div class="card mt-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Мои работы</h4>
+        <a href="{{ url_for('add_portfolio_item') }}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus"></i> Добавить работу
+        </a>
+    </div>
+    <div class="card-body">
+        {% if user.portfolio_items %}
+        <div class="row">
+            {% for item in user.portfolio_items %}
+            <div class="col-md-6 mb-3">
+                <div class="card">
+                    <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" class="card-img-top" alt="{{ artist.username }}" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <form action="{{ url_for('delete_portfolio_item', item_id=item.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Удалить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted">Вы пока не добавили ни одной работы в портфолио.</p>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

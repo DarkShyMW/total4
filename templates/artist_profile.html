@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body text-center">
+                    <img src="{{ url_for('static', filename='uploads/' + artist.avatar) }}" class="avatar mb-3">
+                    <h3>{{ artist.username }}</h3>
+                    <span class="badge species-badge mb-2">{{ artist.species }}</span>
+                    
+                    <div class="mt-4">
+                        <h5>Стиль</h5>
+                        <p>{{ artist.style }}</p>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h5>Рейтинг</h5>
+                        <div class="rating-stars fs-3">
+                            {% for i in range(5) %}
+                                <i class="bi bi-star-fill{% if i >= artist.rating|int %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                        </div>
+                        <p>{{ artist.rating|round(1) }}/5.0</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Цена</h5>
+                        <p class="fs-4">${{ artist.price_per_hour }}/час</p>
+                    </div>
+                    
+                    {% if artist.telegram %}
+                    <div class="mt-4">
+                        <a href="https://t.me/{{ artist.telegram }}" class="btn btn-success w-100" target="_blank">
+                            <i class="bi bi-telegram"></i> Написать в Telegram
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if current_user.is_authenticated and current_user.id != artist.id %}
+                    <div class="mt-3">
+                        <form method="POST" action="{{ url_for('toggle_like', artist_id=artist.id) }}">
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="bi bi-heart{% if is_liked %}-fill{% endif %}"></i>
+                                Лайк
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">О художнике</h4>
+                    <p class="card-text">{{ artist.bio or "Художник пока не добавил информацию о себе." }}</p>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">Портфолио</h4>
+                </div>
+                <div class="card-body">
+                    {% if artist.portfolio_items %}
+                    <div class="row">
+                        {% for item in artist.portfolio_items %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.title }}">
+                                <div class="card-body">
+                                    <h5>{{ item.title }}</h5>
+                                    <p>{{ item.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Художник пока не добавил работы в портфолио.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

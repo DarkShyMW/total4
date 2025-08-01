@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Поиск художников</h2>
+            
+            <div class="card">
+                <div class="card-body">
+                    <form class="row g-3" action="{{ url_for('search') }}" method="get">
+                        <div class="col-md-4">
+                            <label class="form-label">Имя художника</label>
+                            <input type="text" name="q" class="form-control" value="{{ search_query or '' }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Минимальный рейтинг</label>
+                            <select name="min_rating" class="form-select">
+                                <option value="0">Любой</option>
+                                <option value="1" {% if request.args.get('min_rating') == '1' %}selected{% endif %}>1+</option>
+                                <option value="2" {% if request.args.get('min_rating') == '2' %}selected{% endif %}>2+</option>
+                                <option value="3" {% if request.args.get('min_rating') == '3' %}selected{% endif %}>3+</option>
+                                <option value="4" {% if request.args.get('min_rating') == '4' %}selected{% endif %}>4+</option>
+                                <option value="5" {% if request.args.get('min_rating') == '5' %}selected{% endif %}>5</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Стиль</label>
+                            <input type="text" name="style" class="form-control" value="{{ request.args.get('style', '') }}">
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Поиск</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            {% if artists %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for artist in artists %}
+                <div class="col">
+                    <div class="card h-100 artist-card">
+                        <img src="https://via.placeholder.com/300" class="card-img-top" alt="{{ artist.username }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ artist.username }}</h5>
+                            <p class="card-text text-muted">{{ artist.style }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="rating-stars">
+                                        {% for i in range(5) %}
+                                            {% if i < artist.rating|int %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="ms-1">{{ artist.rating }}</span>
+                                </div>
+                                <div>
+                                    <span class="like-btn" data-artist-id="{{ artist.id }}">
+                                        <i class="bi {% if artist in current_user.likes_received %}bi-heart-fill liked{% else %}bi-heart{% endif %}"></i>
+                                        <span id="likes-count-{{ artist.id }}">{{ artist.likes_received|length }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{{ url_for('artist_profile', artist_id=artist.id) }}" class="btn btn-primary w-100">Портфолио</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Художники по вашему запросу не найдены. Попробуйте изменить параметры поиска.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>Все художники</h2>
+            <p class="text-muted">Найдено {{ artists|length }} художников</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            {% if artists %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for artist in artists %}
+                <div class="col">
+                    <div class="card h-100 artist-card">
+                        <img src="/uploads/default_avatar.png" class="card-img-top" alt="{{ artist.username }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ artist.username }}</h5>
+                            <p class="card-text text-muted">{{ artist.style }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <span class="rating-stars">
+                                        {% for i in range(5) %}
+                                            {% if i < artist.rating|int %}
+                                                <i class="bi bi-star-fill"></i>
+                                            {% else %}
+                                                <i class="bi bi-star"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </span>
+                                    <span class="ms-1">{{ artist.rating }}</span>
+                                </div>
+                                <div>
+                                    <span class="like-btn" data-artist-id="{{ artist.id }}">
+                                        <i class="bi {% if artist in current_user.likes_received %}bi-heart-fill liked{% else %}bi-heart{% endif %}"></i>
+                                        <span id="likes-count-{{ artist.id }}">{{ artist.likes_received|length }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <a href="{{ url_for('artist_profile', artist_id=artist.id) }}" class="btn btn-primary w-100">Портфолио</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                На платформе пока нет зарегистрированных художников.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

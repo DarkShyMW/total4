@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero py-5 text-center mb-5" style="background-color: #256ec2; border-radius: 15px; color: white">
+    <div class="container">
+        <h1 class="display-4 fw-bold">Найдите идеального фурри-художника</h1>
+        <p class="lead">Площадка для творческих фуррей и тех, кто ценит их искусство</p>
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg mt-3">Присоединиться</a>
+    </div>
+</section>
+
+<div class="container">
+    <h2 class="mb-4">Лучшие художники</h2>
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+        {% for artist in artists %}
+        <div class="col">
+            <div class="card h-100 artist-card">
+                <img src="{{ url_for('static', filename='uploads/' + artist.avatar) }}" class="card-img-top" alt="{{ artist.username }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ artist.username }}</h5>
+                    <span class="badge species-badge mb-2">{{ artist.species }}</span>
+                    <p class="card-text text-muted">{{ artist.style }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="rating-stars">
+                            {% for i in range(5) %}
+                                <i class="bi bi-star-fill{% if i >= artist.rating|int %} text-muted{% endif %}"></i>
+                            {% endfor %}
+                            <span class="ms-1">{{ artist.rating }}</span>
+                        </div>
+                        <span class="text-primary fw-bold">${{ artist.price_per_hour }}/час</span>
+                    </div>
+                </div>
+                <div class="card-footer bg-white">
+                    <a href="{{ url_for('artist_profile', artist_id=artist.id) }}" class="btn btn-primary w-100">Портфолио</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

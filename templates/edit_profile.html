@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header text-white" style="background-color: #FF7F50;">
+                    <h4 class="mb-0">Редактирование профиля</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Аватар</label>
+                            <input type="file" name="avatar" class="form-control">
+                            <small class="text-muted">Оставьте пустым, чтобы сохранить текущий аватар</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Telegram</label>
+                            <input type="text" name="telegram" class="form-control" value="{{ user.telegram or '' }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Ваш вид (фурсона)</label>
+                            <input type="text" name="species" class="form-control" value="{{ user.species or '' }}" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">О себе</label>
+                            <textarea name="bio" class="form-control" rows="3">{{ user.bio or '' }}</textarea>
+                        </div>
+                        
+                        {% if user.role == 'artist' %}
+                        <div class="mb-3">
+                            <label class="form-label">Стиль рисования</label>
+                            <input type="text" name="style" class="form-control" value="{{ user.style or '' }}">
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Опыт (лет)</label>
+                                <input type="number" name="experience" class="form-control" value="{{ user.experience or 0 }}" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Цена за час ($)</label>
+                                <input type="number" name="price_per_hour" class="form-control" value="{{ user.price_per_hour or 0 }}" min="0" step="0.01">
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

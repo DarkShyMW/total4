@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="FurryArt - площадка для фурри-художников и ценителей их творчества. Найдите художников, закажите арты и делитесь своими работами.">
+    <meta name="keywords" content="фурри арт, furry художники, заказать арт, фурри сообщество, furryart">
+    <meta name="author" content="FurryArt">
+    <meta property="og:title" content="FurryArt - Площадка для фурри-художников">
+    <meta property="og:description" content="Сообщество фурри-художников и ценителей их творчества">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url_root }}">
+    <meta property="og:image" content="{{ url_for('static', filename='images/og_image.jpg', _external=True) }}">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="{{ request.url_root }}">
+    
+    <title>FurryArt - Сообщество фурри-художников | Заказать арт</title>
+    
+    <!-- Preload важных ресурсов -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='css/style.css') }}" as="style">
+    <link rel="preload" href="{{ url_for('static', filename='images/logo.png') }}" as="image">
+    
+    <!-- Основные стили -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.ico') }}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+</head>
+<body class="custom-cursor" itemscope itemtype="http://schema.org/WebSite">
+    <nav class="navbar navbar-expand-lg navbar-dark" itemscope itemtype="http://schema.org/SiteNavigationElement">
+        <div class="container">
+            <a class="navbar-brand" href="/" itemprop="url">
+                <span class="furry-paw-logo" itemprop="logo" itemscope itemtype="https://schema.org/ImageObject">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" width="30" height="30" alt="Логотип FurryArt" itemprop="contentUrl">
+                    <meta itemprop="width" content="30">
+                    <meta itemprop="height" content="30">
+                </span>
+                <span itemprop="name">FurryArt</span>
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-label="Меню навигации">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item" itemprop="name">
+                        <a class="nav-link" href="{{ url_for('index') }}" itemprop="url">Художники</a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Меню пользователя">
+                                <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" width="30" height="30" class="rounded-circle me-1" alt="Аватар {{ current_user.username }}">
+                                <span itemprop="name">{{ current_user.username }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}" itemprop="url">Профиль</a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('edit_profile') }}" itemprop="url">Настройки</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}" itemprop="url">Выйти</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item" itemprop="name">
+                            <a class="nav-link" href="{{ url_for('login') }}" itemprop="url">Войти</a>
+                        </li>
+                        <li class="nav-item" itemprop="name">
+                            <a class="nav-link" href="{{ url_for('register') }}" itemprop="url">Регистрация</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container my-4" role="main">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="bg-dark text-white py-4 mt-5" itemscope itemtype="http://schema.org/WPFooter">
+        <div class="container text-center">
+            <p itemprop="copyrightYear">&copy; 2025 <span itemprop="copyrightHolder">FurryArt</span> - Площадка для фурри-художников</p>
+            <ul class="list-inline mb-0">
+                <li class="list-inline-item"><a href="/privacy" class="text-white" itemprop="url">Политика конфиденциальности</a></li>
+                <li class="list-inline-item"><a href="/terms" class="text-white" itemprop="url">Условия использования</a></li>
+                <li class="list-inline-item"><a href="/contact" class="text-white" itemprop="url">Контакты</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <!-- Скрипты внизу страницы -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="{{ url_for('static', filename='js/script.js') }}" defer></script>
+    {% block scripts %}{% endblock %}
+    
+    <!-- Schema.org разметка -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "FurryArt",
+        "url": "{{ request.url_root }}",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": "{{ request.url_root }}search?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+    </script>
+</body>
+</html>

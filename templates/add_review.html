@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Оставить отзыв для {{ artist.username }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label class="form-label">Ваша оценка</label>
+                            <div class="rating-stars fs-2" id="ratingStars">
+                                <i class="bi bi-star" data-rating="1"></i>
+                                <i class="bi bi-star" data-rating="2"></i>
+                                <i class="bi bi-star" data-rating="3"></i>
+                                <i class="bi bi-star" data-rating="4"></i>
+                                <i class="bi bi-star" data-rating="5"></i>
+                            </div>
+                            <input type="hidden" name="rating" id="ratingValue" value="5" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Текст отзыва</label>
+                            <textarea name="content" class="form-control" rows="5" required></textarea>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+                            <a href="{{ url_for('artist_profile', artist_id=artist.id) }}" class="btn btn-outline-secondary">Отмена</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Обработка выбора рейтинга
+    document.querySelectorAll('#ratingStars i').forEach(star => {
+        star.addEventListener('click', function() {
+            const rating = parseInt(this.dataset.rating);
+            document.getElementById('ratingValue').value = rating;
+            
+            // Обновляем отображение звезд
+            document.querySelectorAll('#ratingStars i').forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.add('bi-star-fill');
+                    s.classList.remove('bi-star');
+                } else {
+                    s.classList.add('bi-star');
+                    s.classList.remove('bi-star-fill');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,74 @@
+.logo {
+  font-size: 1.25rem;
+  color: white;
+  white-space: nowrap;
+  
+}
+/* Click animation effect */
+.click-effect {
+  position: fixed;
+  width: 30px;
+  height: 30px;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255,155,125,0.8) 0%, rgba(255,155,125,0) 70%);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  animation: clickEffect 0.4s ease-out;
+  z-index: 9999;
+}
+
+@keyframes clickEffect {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.5);
+  }
+}
+
+    :root {
+            --primary-color: #1469a1;
+            --secondary-color: #256ec2;
+            --dark-color: #2E2E2E;
+        }
+        
+        body {
+            background-color: #FFF8F0;
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color) !important;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .artist-card {
+            transition: transform 0.3s;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 3px solid var(--primary-color);
+        }
+        
+        .artist-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 127, 80, 0.2);
+        }
+        
+        .avatar {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 3px solid var(--primary-color);
+        }
+        
+        .species-badge {
+            background-color: var(--secondary-color);
+            color: white;
+        }

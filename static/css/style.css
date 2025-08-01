@@ -2,7 +2,12 @@
   font-size: 1.25rem;
   color: white;
   white-space: nowrap;
-  
+
+}
+.verified-badge {
+    color: #1DA1F2;
+    margin-left: 5px;
+    font-size: 0.9em;
 }
 /* Click animation effect */
 .click-effect {

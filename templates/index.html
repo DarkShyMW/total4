@@ -17,7 +17,11 @@
             <div class="card h-100 artist-card">
                 <img src="{{ url_for('static', filename='uploads/' + artist.avatar) }}" class="card-img-top" alt="{{ artist.username }}" style="height: 200px; object-fit: cover;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ artist.username }}</h5>
+                    <h5 class="card-title">{{ artist.username }} {% if artist.is_approved %}
+                        <span class="verified-badge" title="Verified Artist">
+                            <i class="fa fa-check-circle"></i>
+                        </span>
+                    {% endif %}</h5>
                     <span class="badge species-badge mb-2">{{ artist.species }}</span>
                     <p class="card-text text-muted">{{ artist.style }}</p>
                     <div class="d-flex justify-content-between align-items-center">

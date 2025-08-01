@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-import datetime
+from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -18,6 +18,8 @@ class User(db.Model, UserMixin):
     bio = db.Column(db.Text)
     species = db.Column(db.String(50))
     is_approved = db.Column(db.Boolean, default=False)
+    def is_verified(self):
+        return self.is_approved
     
     # Для художников
     style = db.Column(db.String(100))

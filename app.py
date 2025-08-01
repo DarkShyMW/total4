@@ -1,10 +1,13 @@
+
+
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
-from flask_sqlalchemy import SQLAlchemy
-from flask_admin import Admin
+from flask_admin import Admin, AdminIndexView, expose
+from flask_admin.base import MenuLink
+from flask_admin.menu import MenuView
 from flask_admin.contrib.sqla import ModelView
-from models import User, PortfolioItem, Review, Like  # Добавьте все необходимые импорты
+from models import db, User, PortfolioItem, Review, Like
 from datetime import datetime
 import os
 
@@ -14,9 +17,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
-
-db = SQLAlchemy(app)
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'} # Add this line
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -35,35 +36,57 @@ class BaseModelView(ModelView):
         
         super(BaseModelView, self).__init__(model, session, name=name, category=category, endpoint=endpoint, url=url)
 
-class ProjectModelView(BaseModelView):
-    def __init__(self, model, session, *args, **kwargs):
-        super(ProjectModelView, self).__init__(model, session, *args, **kwargs)
-        
+# Кастомный AdminIndexView для проверки прав доступа
+class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.role == 'admin'
+    
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login'))
+    
+# Кастомные ModelView для админки с проверкой доступа
+class SecureModelView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'admin'
+    
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('login'))
 
-class UserModelView(BaseModelView):
+# Обновляем все ModelView, чтобы они наследовались от SecureModelView
+class UserModelView(SecureModelView):
     column_list = ('id', 'username', 'email', 'role', 'species', 'is_approved', 'rating')
     column_searchable_list = ('username', 'email')
     column_filters = ('role', 'is_approved')
     form_columns = ('username', 'email', 'role', 'species', 'is_approved', 'style', 'rating')
     column_editable_list = ('is_approved',)
+    
+    # Добавляем галочку верификации в список пользователей
+    def _is_approved_formatter(view, context, model, name):
+        if model.is_approved:
+            return '<span class="fa fa-check-circle" style="color: green;"></span>'
+        return ''
+    
+    column_formatters = {
+        'is_approved': _is_approved_formatter
+    }
 
-class PortfolioModelView(BaseModelView):
+class PortfolioModelView(SecureModelView):
     column_list = ('id', 'title', 'artist', 'created_at')
     column_searchable_list = ('title',)
     form_columns = ('title', 'description', 'image_url', 'artist')
 
-class ReviewModelView(BaseModelView):
+class ReviewModelView(SecureModelView):
     column_list = ('id', 'artist', 'client', 'rating', 'created_at')
     form_columns = ('content', 'rating', 'artist', 'client')
 
-class LikeModelView(BaseModelView):
+class LikeModelView(SecureModelView):
     column_list = ('id', 'user', 'artist', 'created_at')
     form_columns = ('user', 'artist')
 
-# Инициализация админ-панели
-admin = Admin(app, name='FurryArt Admin', template_mode='bootstrap3')
+
+
+# Инициализация админ-панели с кастомным индексным представлением
+admin = Admin(app, name='FurryArt Admin', template_mode='bootstrap3', index_view=MyAdminIndexView())
 
 # Регистрация моделей в админке
 admin.add_view(UserModelView(User, db.session, name='Пользователи'))
@@ -179,11 +202,16 @@ def edit_profile():
 @app.route('/artist/<int:artist_id>')
 def artist_profile(artist_id):
     artist = User.query.get_or_404(artist_id)
-    is_liked = Like.query.filter_by(user_id=current_user.id, artist_id=artist_id).first() is not None
-    return render_template('artist_profile.html', 
-                         artist=artist, 
+    
+    # Проверяем, авторизован ли пользователь, прежде чем проверять лайки
+    is_liked = False
+    if current_user.is_authenticated:
+        is_liked = Like.query.filter_by(user_id=current_user.id, artist_id=artist_id).first() is not None
+    
+    return render_template('artist_profile.html',
+                         artist=artist,
                          is_liked=is_liked,
-                         current_user=current_user)  # Pass current_user explicitly
+                         current_user=current_user)
 
 @app.route('/artist/<int:artist_id>/like', methods=['POST'])
 @login_required
@@ -246,4 +274,4 @@ if __name__ == '__main__':
     app.run(debug=True)
 
 
-    #TODO: Сделать, блять, проверку на админа. А то я рот его ебал. Входи кто хош.
+    #TODO: Придумать чтонибудь еще.

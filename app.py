@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
+from flask_sqlalchemy import SQLAlchemy
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from models import db, User, PortfolioItem, Review, Like
+from models import User, PortfolioItem, Review, Like  # Добавьте все необходимые импорты
 from datetime import datetime
 import os
 
@@ -13,7 +14,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}  # Add this line
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+
+db = SQLAlchemy(app)
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -31,6 +34,13 @@ class BaseModelView(ModelView):
             setattr(self, k, v)
         
         super(BaseModelView, self).__init__(model, session, name=name, category=category, endpoint=endpoint, url=url)
+
+class ProjectModelView(BaseModelView):
+    def __init__(self, model, session, *args, **kwargs):
+        super(ProjectModelView, self).__init__(model, session, *args, **kwargs)
+        
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.role == 'admin'
 
 class UserModelView(BaseModelView):
     column_list = ('id', 'username', 'email', 'role', 'species', 'is_approved', 'rating')

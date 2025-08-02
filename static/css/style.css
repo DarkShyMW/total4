@@ -77,3 +77,51 @@
             background-color: var(--secondary-color);
             color: white;
         }
+
+:root {
+    --bg-color: #ffffff;
+    --text-color: #720808;
+    --card-bg: #f8f9fa;
+    --header-bg: #343a40;
+    --footer-bg: #343a40;
+    --primary: #256ec2;
+    --secondary: #6c757d;
+}
+
+[data-theme="dark"] {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --card-bg: #1e1e1e;
+    --header-bg: #1a1a1a;
+    --footer-bg: #1a1a1a;
+    --primary: #3a86ff;
+    --secondary: #adb5bd;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar-dark {
+    background-color: var(--header-bg) !important;
+}
+
+.bg-dark {
+    background-color: var(--footer-bg) !important;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-color: rgba(0,0,0,0.1);
+}
+
+/* Кастомный курсор */
+.custom-cursor {
+    cursor: url("../images/paw.png"), auto;
+}
+
+.custom-pointer {
+    cursor: url("../images/paw.png"), pointer;
+}

@@ -51,6 +51,10 @@
                     <li class="nav-item" itemprop="name">
                         <a class="nav-link" href="{{ url_for('index') }}" itemprop="url">Художники</a>
                     </li>
+                    <div class="form-check form-switch mt-2">
+                                    <input class="form-check-input" type="checkbox" id="themeSwitch">
+                                    <label class="form-check-label" for="themeSwitch" id="themeLabel">Темная тема</label>
+                                </div>
                 </ul>
                 
                 <ul class="navbar-nav ms-auto">
@@ -124,6 +128,39 @@
             "query-input": "required name=search_term_string"
         }
     }
+    </script>
+    <script>
+        // Обработка темы
+document.addEventListener('DOMContentLoaded', function() {
+    const themeSwitch = document.getElementById('themeSwitch');
+    const themeLabel = document.getElementById('themeLabel');
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    
+    // Применяем сохраненную тему
+    if (currentTheme === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        themeSwitch.checked = true;
+        themeLabel.textContent = 'Светлая тема';
+    }
+    
+    // Обработчик переключения
+    themeSwitch.addEventListener('change', function() {
+        if (this.checked) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+            themeLabel.textContent = 'Светлая тема';
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+            themeLabel.textContent = 'Темная тема';
+        }
+    });
+    
+    // Добавляем классы для кастомного курсора всем интерактивным элементам
+    document.querySelectorAll('a, button, input, .btn').forEach(el => {
+        el.classList.add('custom-pointer');
+    });
+});
     </script>
 </body>
 </html>

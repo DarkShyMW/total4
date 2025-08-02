@@ -7,9 +7,12 @@ from flask_admin import Admin, AdminIndexView, expose
 from flask_admin.base import MenuLink
 from flask_admin.menu import MenuView
 from flask_admin.contrib.sqla import ModelView
-from models import db, User, PortfolioItem, Review, Like
+from models import db, User, PortfolioItem, Review, Like, Comment
 from datetime import datetime
 import os
+import threading
+import requests
+from flask import jsonify
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'BGWa4bZNOriWsw7WejMomQXzj-9ICH3dQz6Tkw9GYakDYLDQPB8AVxU-8jwdXtpWLjohP2Zvnuuc2zhdXtEBhME'
@@ -18,6 +21,11 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['FLASK_ADMIN_SWATCH'] = 'cerulean'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'} # Add this line
+app.config['FLASK_ADMIN_SWATCH'] = 'slate'  # Темная тема для админки
+
+# Конфигурация Telegram бота
+TELEGRAM_BOT_TOKEN = "7711849755:AAHvzB4Y0j80mBoy-r7yhEvnPwu_l_BR5PY"
+TELEGRAM_ADMIN_CHAT_ID = "ВАШ_CHAT_ID"  # Замените на реальный chat_id
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -35,6 +43,23 @@ class BaseModelView(ModelView):
             setattr(self, k, v)
         
         super(BaseModelView, self).__init__(model, session, name=name, category=category, endpoint=endpoint, url=url)
+def send_telegram_notification(message):
+    """Отправка уведомления в Telegram"""
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        'chat_id': TELEGRAM_ADMIN_CHAT_ID,
+        'text': message,
+        'parse_mode': 'HTML'
+    }
+    try:
+        requests.post(url, data=payload)
+    except Exception as e:
+        app.logger.error(f"Ошибка отправки в Telegram: {e}")
+
+def async_send_telegram(message):
+    """Асинхронная отправка уведомления"""
+    thread = threading.Thread(target=send_telegram_notification, args=(message,))
+    thread.start()
 
 # Кастомный AdminIndexView для проверки прав доступа
 class MyAdminIndexView(AdminIndexView):
@@ -83,6 +108,9 @@ class LikeModelView(SecureModelView):
     column_list = ('id', 'user', 'artist', 'created_at')
     form_columns = ('user', 'artist')
 
+class CommentModelView(SecureModelView):
+    column_list = ('id', 'content', 'user', 'portfolio_item', 'created_at')
+    form_columns = ('content', 'user', 'portfolio_item')
 
 
 # Инициализация админ-панели с кастомным индексным представлением
@@ -93,6 +121,7 @@ admin.add_view(UserModelView(User, db.session, name='Пользователи'))
 admin.add_view(PortfolioModelView(PortfolioItem, db.session, name='Портфолио'))
 admin.add_view(ReviewModelView(Review, db.session, name='Отзывы'))
 admin.add_view(LikeModelView(Like, db.session, name='Лайки'))
+admin.add_view(CommentModelView(Comment, db.session, name='Комментарии'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -140,6 +169,11 @@ def register():
         db.session.add(user)
         db.session.commit()
         
+        # Отправка уведомления админам
+        if user.role == 'artist':
+            message = f"🎨 Новый художник зарегистрировался!\n\nИмя: {user.username}\nСпециализация: {user.species}\nСтиль: {user.style}"
+            async_send_telegram(message)
+
         login_user(user)
         flash('Регистрация прошла успешно!', 'success')
         return redirect(url_for('index'))
@@ -164,6 +198,44 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+# Добавление комментария
+@app.route('/portfolio/<int:item_id>/comment', methods=['POST'])
+@login_required
+def add_comment(item_id):
+    item = PortfolioItem.query.get_or_404(item_id)
+    content = request.form.get('content')
+    
+    if not content:
+        flash('Комментарий не может быть пустым', 'danger')
+        return redirect(url_for('artist_profile', artist_id=item.artist_id))
+    
+    comment = Comment(
+        content=content,
+        user_id=current_user.id,
+        portfolio_item_id=item.id
+    )
+    db.session.add(comment)
+    db.session.commit()
+    
+    flash('Комментарий добавлен', 'success')
+    return redirect(url_for('artist_profile', artist_id=item.artist_id))
+
+# Удаление комментария
+@app.route('/comment/delete/<int:comment_id>', methods=['POST'])
+@login_required
+def delete_comment(comment_id):
+    comment = Comment.query.get_or_404(comment_id)
+    artist_id = comment.portfolio_item.artist_id
+    
+    if comment.user_id != current_user.id and current_user.role != 'admin':
+        flash('Вы не можете удалить этот комментарий', 'danger')
+        return redirect(url_for('artist_profile', artist_id=artist_id))
+    
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Комментарий удален', 'success')
+    return redirect(url_for('artist_profile', artist_id=artist_id))
 
 @app.route('/profile')
 @login_required

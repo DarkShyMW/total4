@@ -10,7 +10,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)  # Переименовали поле
+    password_hash = db.Column(db.String(200), nullable=False)
     avatar = db.Column(db.String(200), default='default_avatar.png')
     role = db.Column(db.String(20), nullable=False, default='client')
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -18,6 +18,7 @@ class User(db.Model, UserMixin):
     bio = db.Column(db.Text)
     species = db.Column(db.String(50))
     is_approved = db.Column(db.Boolean, default=False)
+    
     def is_verified(self):
         return self.is_approved
     
@@ -33,6 +34,7 @@ class User(db.Model, UserMixin):
     reviews_given = db.relationship('Review', back_populates='client', foreign_keys='Review.client_id')
     likes_received = db.relationship('Like', back_populates='artist', foreign_keys='Like.artist_id')
     likes_given = db.relationship('Like', back_populates='user', foreign_keys='Like.user_id')
+    comments = db.relationship('Comment', back_populates='user')  # Добавлено
 
     @property
     def password(self):
@@ -58,9 +60,18 @@ class PortfolioItem(db.Model):
     artist_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     
     artist = db.relationship('User', back_populates='portfolio_items')
+    comments = db.relationship('Comment', back_populates='portfolio_item', cascade='all, delete-orphan')
 
-    def __repr__(self):
-        return f'<PortfolioItem {self.title}>'
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    portfolio_item_id = db.Column(db.Integer, db.ForeignKey('portfolio_items.id'), nullable=False)
+    
+    user = db.relationship('User', back_populates='comments')
+    portfolio_item = db.relationship('PortfolioItem', back_populates='comments')  # Исправлено
 
 class Review(db.Model):
     __tablename__ = 'reviews'
